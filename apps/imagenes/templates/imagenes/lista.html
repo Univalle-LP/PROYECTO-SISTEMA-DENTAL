@@ -1,0 +1,543 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Imágenes Dentales
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Gestión de Imágenes Dentales
+            </h2>
+
+            <p class="text-muted mb-0">
+                Registro y administración de imágenes odontológicas
+            </p>
+
+        </div>
+
+        <button
+            class="btn btn-primary rounded-3 px-4"
+            data-bs-toggle="modal"
+            data-bs-target="#modalImagen"
+        >
+
+            <i class="bi bi-plus-circle"></i>
+            Nueva Imagen
+
+        </button>
+
+    </div>
+
+    <!-- TABLA -->
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle table-hover">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Paciente</th>
+                            <th>Consulta</th>
+                            <th>Imagen</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for i in imagenes %}
+
+                        <tr>
+
+                            <!-- ID -->
+
+                            <td class="fw-bold">
+
+                                {{ i.id_imagen }}
+
+                            </td>
+
+                            <!-- PACIENTE -->
+
+                            <td>
+
+                                <div class="fw-semibold">
+
+                                    {{ i.id_consulta.id_paciente.nombres }}
+
+                                    {{ i.id_consulta.id_paciente.apellidos }}
+
+                                </div>
+
+                            </td>
+
+                            <!-- CONSULTA -->
+
+                            <td>
+
+                                <span class="badge bg-info text-dark rounded-pill px-3 py-2">
+
+                                    Consulta {{ i.id_consulta.id_consulta }}
+
+                                </span>
+
+                            </td>
+
+                            <!-- IMAGEN -->
+
+                            <td>
+
+                                <img
+                                    src="{{ i.imagen.url }}"
+                                    width="80"
+                                    height="80"
+                                    class="rounded-3 shadow-sm border"
+                                    style="object-fit: cover;"
+                                >
+
+                            </td>
+
+                            <!-- TIPO -->
+
+                            <td>
+
+                                {% if i.tipo_imagen == 'Radiografía' %}
+
+                                <span class="badge bg-primary rounded-pill px-3 py-2">
+
+                                    {{ i.tipo_imagen }}
+
+                                </span>
+
+                                {% elif i.tipo_imagen == 'Fotografía' %}
+
+                                <span class="badge bg-success rounded-pill px-3 py-2">
+
+                                    {{ i.tipo_imagen }}
+
+                                </span>
+
+                                {% else %}
+
+                                <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+
+                                    {{ i.tipo_imagen }}
+
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <!-- DESCRIPCION -->
+
+                            <td style="max-width: 220px;">
+
+                                <div class="text-truncate">
+
+                                    {{ i.descripcion }}
+
+                                </div>
+
+                            </td>
+
+                            <!-- FECHA -->
+
+                            <td>
+
+                                {{ i.fecha_subida|date:"d/m/Y" }}
+
+                            </td>
+
+                            <!-- ACCIONES -->
+
+                            <td>
+
+                                <button
+                                    class="btn btn-warning btn-sm rounded-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editarModal{{ i.id_imagen }}"
+                                >
+
+                                    <i class="bi bi-pencil-square"></i>
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                        <!-- =====================================
+                        MODAL EDITAR
+                        ====================================== -->
+
+                        <div
+                            class="modal fade"
+                            id="editarModal{{ i.id_imagen }}"
+                            tabindex="-1"
+                        >
+
+                            <div class="modal-dialog modal-lg">
+
+                                <div class="modal-content border-0 rounded-4">
+
+                                    <div class="modal-header">
+
+                                        <h5 class="modal-title fw-bold">
+
+                                            Editar Imagen Dental
+
+                                        </h5>
+
+                                        <button
+                                            type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                        ></button>
+
+                                    </div>
+
+                                    <form
+                                        method="POST"
+                                        action="/imagenes/editar/{{ i.id_imagen }}/"
+                                        enctype="multipart/form-data"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <div class="modal-body">
+
+                                            <div class="row">
+
+                                                <!-- PACIENTE -->
+
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label fw-semibold">
+
+                                                        Paciente
+
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        class="form-control"
+                                                        value="{{ i.id_consulta.id_paciente.nombres }} {{ i.id_consulta.id_paciente.apellidos }}"
+                                                        readonly
+                                                    >
+
+                                                </div>
+
+                                                <!-- TIPO -->
+
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label fw-semibold">
+
+                                                        Tipo Imagen
+
+                                                    </label>
+
+                                                    <select
+                                                        name="tipo_imagen"
+                                                        class="form-select"
+                                                    >
+
+                                                        <option
+                                                            value="Radiografía"
+                                                            {% if i.tipo_imagen == 'Radiografía' %}
+                                                            selected
+                                                            {% endif %}
+                                                        >
+                                                            Radiografía
+                                                        </option>
+
+                                                        <option
+                                                            value="Fotografía"
+                                                            {% if i.tipo_imagen == 'Fotografía' %}
+                                                            selected
+                                                            {% endif %}
+                                                        >
+                                                            Fotografía
+                                                        </option>
+
+                                                        <option
+                                                            value="Tomografía"
+                                                            {% if i.tipo_imagen == 'Tomografía' %}
+                                                            selected
+                                                            {% endif %}
+                                                        >
+                                                            Tomografía
+                                                        </option>
+
+                                                    </select>
+
+                                                </div>
+
+                                                <!-- IMAGEN -->
+
+                                                <div class="col-md-12 text-center mb-4">
+
+                                                    <img
+                                                        src="{{ i.imagen.url }}"
+                                                        class="img-fluid rounded-4 shadow"
+                                                        style="max-height: 250px;"
+                                                    >
+
+                                                </div>
+
+                                                <!-- NUEVA IMAGEN -->
+
+                                                <div class="col-md-12 mb-3">
+
+                                                    <label class="form-label fw-semibold">
+
+                                                        Cambiar Imagen
+
+                                                    </label>
+
+                                                    <input
+                                                        type="file"
+                                                        name="imagen"
+                                                        class="form-control"
+                                                    >
+
+                                                </div>
+
+                                                <!-- DESCRIPCION -->
+
+                                                <div class="col-md-12 mb-3">
+
+                                                    <label class="form-label fw-semibold">
+
+                                                        Descripción
+
+                                                    </label>
+
+                                                    <textarea
+                                                        name="descripcion"
+                                                        class="form-control"
+                                                        rows="4"
+                                                    >{{ i.descripcion }}</textarea>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-secondary rounded-3"
+                                                data-bs-dismiss="modal"
+                                            >
+
+                                                Cancelar
+
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-warning rounded-3"
+                                            >
+
+                                                Actualizar
+
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="8" class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    No existen imágenes registradas.
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =====================================
+MODAL NUEVA IMAGEN
+===================================== -->
+
+<div
+    class="modal fade"
+    id="modalImagen"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-lg">
+
+        <div class="modal-content border-0 rounded-4">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+
+                    Registrar Imagen Dental
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+            >
+
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <div class="row">
+
+                        <!-- CONSULTA -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label fw-semibold">
+
+                                Consulta
+
+                            </label>
+
+                            {{ form.id_consulta }}
+
+                        </div>
+
+                        <!-- TIPO -->
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label fw-semibold">
+
+                                Tipo Imagen
+
+                            </label>
+
+                            {{ form.tipo_imagen }}
+
+                        </div>
+
+                        <!-- IMAGEN -->
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label fw-semibold">
+
+                                Imagen Dental
+
+                            </label>
+
+                            {{ form.imagen }}
+
+                        </div>
+
+                        <!-- DESCRIPCION -->
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label fw-semibold">
+
+                                Descripción
+
+                            </label>
+
+                            {{ form.descripcion }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary rounded-3"
+                        data-bs-dismiss="modal"
+                    >
+
+                        Cancelar
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary rounded-3"
+                    >
+
+                        Guardar Imagen
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,546 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Citas
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-calendar2-week-fill text-primary me-2"></i>
+                Gestión de Citas
+            </h2>
+            <p class="text-muted mb-0">Administra las citas programadas, completadas y canceladas</p>
+        </div>
+
+        <button
+            class="btn btn-primary btn-lg shadow-sm rounded-3"
+            data-bs-toggle="modal"
+            data-bs-target="#modalCita"
+        >
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva Cita
+        </button>
+
+    </div>
+
+    <!-- RESUMEN RAPIDO -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted">Programadas</h6>
+                        <h4 class="mb-0 fw-bold">
+                            {{ total_programadas }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+                        <i class="bi bi-check-circle fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted">Completadas</h6>
+                        <h4 class="mb-0 fw-bold">
+                            {{ total_completadas }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width:50px; height:50px;">
+                        <i class="bi bi-x-circle fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-muted">Canceladas</h6>
+                        <h4 class="mb-0 fw-bold">
+                            {{ total_canceladas }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+
+    <div class="card shadow-sm border-0 rounded-4">
+
+        <div class="card-header bg-white border-0 pt-4 pb-0">
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-list-ul me-2 text-primary"></i>
+                Listado de Citas
+            </h5>
+        </div>
+
+        <div class="card-body pt-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr class="text-muted small text-uppercase">
+
+                            <th class="ps-3">#</th>
+                            <th>Paciente</th>
+                            <th>Atendido por</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Observación</th>
+                            <th class="text-end pe-3">Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for c in citas %}
+
+                        <tr>
+
+                            <td class="ps-3 text-muted">
+
+                                #{{ c.id_cita }}
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; font-size:0.85rem;">
+
+                                        {{ c.id_paciente.nombres|first|upper }}{{ c.id_paciente.apellidos|first|upper }}
+
+                                    </div>
+
+                                    <span class="fw-semibold">
+
+                                        {{ c.id_paciente.nombres }}
+                                        {{ c.id_paciente.apellidos }}
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <span class="text-muted">
+
+                                    <i class="bi bi-person-badge me-1"></i>
+                                    {{ c.id_usuario.nombre }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">{{ c.fecha_cita|date:"d/m/Y" }}</span>
+                                    <small class="text-muted">{{ c.fecha_cita|date:"H:i" }} hrs</small>
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                {% if c.estado == 'programada' %}
+
+                                    <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ c.estado|capfirst }}
+                                    </span>
+
+                                {% elif c.estado == 'completada' %}
+
+                                    <span class="badge rounded-pill bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        {{ c.estado|capfirst }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger px-3 py-2">
+                                        <i class="bi bi-x-lg me-1"></i>
+                                        {{ c.estado|capfirst }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <span class="text-muted">
+                                    {% if c.observacion %}
+                                        {{ c.observacion|truncatechars:40 }}
+                                    {% else %}
+                                        <span class="fst-italic">Sin observaciones</span>
+                                    {% endif %}
+                                </span>
+
+                            </td>
+
+                            <td class="text-end pe-3">
+
+                                <button
+                                    class="btn btn-outline-warning btn-sm rounded-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editarModal{{ c.id_cita }}"
+                                >
+                                    <i class="bi bi-pencil-square me-1"></i>
+                                    Editar
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                        <!-- ======================================
+                        MODAL EDITAR
+                        ======================================= -->
+
+                        <div
+                            class="modal fade"
+                            id="editarModal{{ c.id_cita }}"
+                            tabindex="-1"
+                        >
+
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+
+                                <div class="modal-content rounded-4 border-0 shadow-lg">
+
+                                    <div class="modal-header border-0 pb-0">
+
+                                        <h5 class="modal-title fw-bold">
+                                            <i class="bi bi-pencil-square me-2 text-warning"></i>
+                                            Editar Cita #{{ c.id_cita }}
+                                        </h5>
+
+                                        <button
+                                            type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                        ></button>
+
+                                    </div>
+
+                                    <form
+                                        method="POST"
+                                        action="/citas/editar/{{ c.id_cita }}/"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <div class="modal-body">
+
+                                            <div class="row g-3">
+
+                                                <!-- PACIENTE SOLO LECTURA -->
+
+                                                <div class="col-md-6">
+
+                                                    <label class="form-label fw-semibold">
+                                                        <i class="bi bi-person me-1"></i>
+                                                        Paciente
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        class="form-control bg-light"
+                                                        value="{{ c.id_paciente.nombres }} {{ c.id_paciente.apellidos }}"
+                                                        readonly
+                                                    >
+
+                                                    <input
+                                                        type="hidden"
+                                                        name="id_paciente"
+                                                        value="{{ c.id_paciente.id_paciente }}"
+                                                    >
+
+                                                </div>
+
+                                                <!-- FECHA -->
+
+                                                <div class="col-md-6">
+
+                                                    <label class="form-label fw-semibold">
+                                                        <i class="bi bi-calendar-event me-1"></i>
+                                                        Fecha
+                                                    </label>
+
+                                                    <input
+                                                        type="datetime-local"
+                                                        name="fecha_cita"
+                                                        value="{{ c.fecha_cita|date:'Y-m-d\\TH:i' }}"
+                                                        class="form-control"
+                                                        required
+                                                    >
+
+                                                </div>
+
+                                                <!-- ESTADO -->
+
+                                                <div class="col-md-6">
+
+                                                    <label class="form-label fw-semibold">
+                                                        <i class="bi bi-flag me-1"></i>
+                                                        Estado
+                                                    </label>
+
+                                                    <select
+                                                        name="estado"
+                                                        class="form-select"
+                                                    >
+
+                                                        <option
+                                                            value="programada"
+                                                            {% if c.estado == 'programada' %}
+                                                                selected
+                                                            {% endif %}
+                                                        >
+
+                                                            Programada
+
+                                                        </option>
+
+                                                        <option
+                                                            value="completada"
+                                                            {% if c.estado == 'completada' %}
+                                                                selected
+                                                            {% endif %}
+                                                        >
+
+                                                            Completada
+
+                                                        </option>
+
+                                                        <option
+                                                            value="cancelada"
+                                                            {% if c.estado == 'cancelada' %}
+                                                                selected
+                                                            {% endif %}
+                                                        >
+
+                                                            Cancelada
+
+                                                        </option>
+
+                                                    </select>
+
+                                                </div>
+
+                                                <!-- OBSERVACION -->
+
+                                                <div class="col-md-12">
+
+                                                    <label class="form-label fw-semibold">
+                                                        <i class="bi bi-chat-left-text me-1"></i>
+                                                        Observación
+                                                    </label>
+
+                                                    <textarea
+                                                        name="observacion"
+                                                        class="form-control"
+                                                        rows="3"
+                                                        placeholder="Escribe una observación..."
+                                                    >{{ c.observacion }}</textarea>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="modal-footer border-0">
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-light rounded-3"
+                                                data-bs-dismiss="modal"
+                                            >
+                                                Cancelar
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-warning rounded-3 px-4"
+                                            >
+                                                <i class="bi bi-save me-1"></i>
+                                                Actualizar
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                        {% if not citas %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                                No hay citas registradas todavía.
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================================
+MODAL NUEVA CITA
+========================================= -->
+
+<div
+    class="modal fade"
+    id="modalCita"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+
+            <div class="modal-header border-0 pb-0">
+
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-calendar-plus me-2 text-primary"></i>
+                    Registrar Cita
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-person me-1"></i>
+                                Paciente
+                            </label>
+
+                            {{ form.id_paciente }}
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                Fecha Cita
+                            </label>
+
+                            {{ form.fecha_cita }}
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-flag me-1"></i>
+                                Estado
+                            </label>
+
+                            {{ form.estado }}
+
+                        </div>
+
+                        <div class="col-md-12">
+
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-chat-left-text me-1"></i>
+                                Observación
+                            </label>
+
+                            {{ form.observacion }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0">
+
+                    <button
+                        type="button"
+                        class="btn btn-light rounded-3"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary rounded-3 px-4"
+                    >
+                        <i class="bi bi-save me-1"></i>
+                        Guardar Cita
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

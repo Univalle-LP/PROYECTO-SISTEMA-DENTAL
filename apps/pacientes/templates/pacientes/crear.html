@@ -1,0 +1,381 @@
+\{% extends 'base.html' %}
+
+{% block title %}
+Editar Paciente
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .card-form {
+
+        border: none;
+
+        border-radius: 20px;
+
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+
+    .form-control,
+    .form-select {
+
+        border-radius: 12px;
+
+        padding: 10px;
+    }
+
+</style>
+
+<div class="container-fluid mt-4">
+
+```
+<div class="card card-form">
+
+    <div class="card-body p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+
+                <h3 class="fw-bold mb-1">
+
+                    Editar Paciente
+
+                </h3>
+
+                <p class="text-muted">
+
+                    Modifica la información del paciente
+
+                </p>
+
+            </div>
+
+            <a href="/pacientes/"
+               class="btn btn-secondary rounded-3">
+
+                Volver
+
+            </a>
+
+        </div>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="row">
+
+                <!-- NOMBRES -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Nombres
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="nombres"
+                        class="form-control"
+                        value="{{ paciente.nombres }}"
+                        required
+                    >
+
+                </div>
+
+                <!-- APELLIDOS -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Apellidos
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="apellidos"
+                        class="form-control"
+                        value="{{ paciente.apellidos }}"
+                        required
+                    >
+
+                </div>
+
+                <!-- EDAD -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Edad
+
+                    </label>
+
+                    <input
+                        type="number"
+                        id="edad"
+                        class="form-control"
+                        min="0"
+                        max="120"
+                        required
+                    >
+
+                </div>
+
+                <input
+                    type="hidden"
+                    name="fecha_nacimiento"
+                    id="fecha_nacimiento"
+                    value="{{ paciente.fecha_nacimiento|date:'Y-m-d' }}"
+                >
+
+                <!-- SEXO -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Sexo
+
+                    </label>
+
+                    <select
+                        name="sexo"
+                        class="form-select"
+                    >
+
+                        <option value="Masculino"
+                            {% if paciente.sexo == 'Masculino' %}
+                                selected
+                            {% endif %}
+                        >
+
+                            Masculino
+
+                        </option>
+
+                        <option value="Femenino"
+                            {% if paciente.sexo == 'Femenino' %}
+                                selected
+                            {% endif %}
+                        >
+
+                            Femenino
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- DIRECCION -->
+
+                <div class="col-md-12 mb-3">
+
+                    <label class="form-label">
+
+                        Dirección
+
+                    </label>
+
+                    <textarea
+                        name="direccion"
+                        class="form-control"
+                        rows="3"
+                    >{{ paciente.direccion }}</textarea>
+
+                </div>
+
+                <!-- TELEFONO -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Teléfono Padre
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="telefono_padre"
+                        class="form-control"
+                        value="{{ paciente.telefono_padre }}"
+                    >
+
+                </div>
+
+                <!-- NOMBRE PADRE -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Nombre Padre
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="nombre_padre"
+                        class="form-control"
+                        value="{{ paciente.nombre_padre }}"
+                    >
+
+                </div>
+
+                <!-- CORREO -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Correo Padre
+
+                    </label>
+
+                    <input
+                        type="email"
+                        name="correo_padre"
+                        class="form-control"
+                        value="{{ paciente.correo_padre }}"
+                    >
+
+                </div>
+
+                <!-- ESTADO -->
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+
+                        Estado
+
+                    </label>
+
+                    <select
+                        name="activo"
+                        class="form-select"
+                    >
+
+                        <option value="True"
+                            {% if paciente.activo %}
+                                selected
+                            {% endif %}
+                        >
+
+                            Activo
+
+                        </option>
+
+                        <option value="False"
+                            {% if not paciente.activo %}
+                                selected
+                            {% endif %}
+                        >
+
+                            Inhabilitado
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <!-- BOTONES -->
+
+            <div class="mt-4">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary px-4 rounded-3"
+                >
+
+                    Guardar Cambios
+
+                </button>
+
+                <a href="/pacientes/"
+                   class="btn btn-light border px-4 rounded-3">
+
+                    Cancelar
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function(){
+
+    const fechaInput = document.getElementById('fecha_nacimiento');
+    const edadInput = document.getElementById('edad');
+
+    function calcularEdad(fechaNacimiento){
+
+        const nacimiento = new Date(fechaNacimiento);
+        const hoy = new Date();
+
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+
+        const mes = hoy.getMonth() - nacimiento.getMonth();
+
+        if (
+            mes < 0 ||
+            (mes === 0 && hoy.getDate() < nacimiento.getDate())
+        ) {
+            edad--;
+        }
+
+        return edad;
+    }
+
+    if(fechaInput.value){
+        edadInput.value = calcularEdad(fechaInput.value);
+    }
+
+    edadInput.addEventListener('input', function(){
+
+        const edad = parseInt(this.value);
+
+        if(!isNaN(edad)){
+
+            const hoy = new Date();
+
+            const fechaNacimiento = new Date(
+                hoy.getFullYear() - edad,
+                hoy.getMonth(),
+                hoy.getDate()
+            );
+
+            const yyyy = fechaNacimiento.getFullYear();
+            const mm = String(fechaNacimiento.getMonth() + 1).padStart(2,'0');
+            const dd = String(fechaNacimiento.getDate()).padStart(2,'0');
+
+            fechaInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+
+    });
+
+});
+
+</script>
+
+{% endblock %}

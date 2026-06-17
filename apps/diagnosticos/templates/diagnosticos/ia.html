@@ -1,0 +1,874 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- ===================================== -->
+    <!-- HEADER -->
+    <!-- ===================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+
+            <h2 class="fw-bold mb-1 text-dark">
+                <i class="bi bi-stars text-purple me-2"></i>
+                Diagnóstico IA Dental
+            </h2>
+
+            <p class="text-muted mb-0">
+                Sistema inteligente de detección de caries
+            </p>
+
+        </div>
+
+        <!-- FORMULARIO -->
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            class="upload-form"
+        >
+
+            {% csrf_token %}
+
+            <div class="row g-2 align-items-center">
+
+                <!-- CONSULTA -->
+
+                <div class="col-md-5">
+
+                    <select
+                        name="consulta_id"
+                        class="form-select rounded-4"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccionar paciente
+                        </option>
+
+                        {% for consulta in consultas %}
+
+                        <option value="{{ consulta.id_consulta }}">
+
+                            {{ consulta.id_paciente.nombres }}
+                            {{ consulta.id_paciente.apellidos }}
+
+                            - Consulta #{{ consulta.id_consulta }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- IMAGEN -->
+
+                <div class="col-md-5">
+
+                    <input
+                        type="file"
+                        name="image"
+                        class="form-control rounded-4"
+                        required
+                    >
+
+                </div>
+
+                <!-- BOTON -->
+
+                <div class="col-md-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-purple text-white rounded-4 w-100"
+                    >
+
+                        <i class="bi bi-cpu-fill me-2"></i>
+
+                        Analizar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- CARDS -->
+    <!-- ===================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- TOTAL -->
+
+        <div class="col-md-4">
+
+            <div class="stats-card purple-card">
+
+                <div>
+
+                    <small>
+                        Diagnósticos Totales
+                    </small>
+
+                    <h2>
+                        {{ total_analisis }}
+                    </h2>
+
+                </div>
+
+                <i class="bi bi-cpu-fill"></i>
+
+            </div>
+
+        </div>
+
+        <!-- PRECISION -->
+
+        <div class="col-md-4">
+
+            <div class="stats-card green-card">
+
+                <div>
+
+                    <small>
+                        Precisión Promedio
+                    </small>
+
+                    <h2>
+                        {{ precision_promedio }}%
+                    </h2>
+
+                </div>
+
+                <i class="bi bi-graph-up-arrow"></i>
+
+            </div>
+
+        </div>
+
+        <!-- HISTORIAL -->
+
+        <div class="col-md-4">
+
+            <div class="stats-card red-card">
+
+                <div>
+
+                    <small>
+                        Últimos análisis
+                    </small>
+
+                    <h2>
+                        {{ historial|length }}
+                    </h2>
+
+                </div>
+
+                <i class="bi bi-clock-history"></i>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- GRAFICAS -->
+    <!-- ===================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- GRAFICO -->
+
+        <div class="col-lg-7">
+
+            <div class="chart-card">
+
+                <h5 class="fw-bold mb-4">
+                    <i class="bi bi-bar-chart-line text-purple me-2"></i>
+                    Diagnósticos por Mes
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="barChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RADAR -->
+
+        <div class="col-lg-5">
+
+            <div class="chart-card">
+
+                <h5 class="fw-bold mb-4">
+                    <i class="bi bi-radar text-purple me-2"></i>
+                    Rendimiento IA
+                </h5>
+
+                <div class="chart-container">
+
+                    <canvas id="radarChart"></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- ERROR -->
+    <!-- ===================================== -->
+
+    {% if error %}
+
+    <div class="alert alert-danger rounded-4 shadow-sm d-flex align-items-center gap-2">
+
+        <i class="bi bi-exclamation-triangle-fill"></i>
+
+        {{ error }}
+
+    </div>
+
+    {% endif %}
+
+    <!-- ===================================== -->
+    <!-- RESULTADO -->
+    <!-- ===================================== -->
+
+    {% if uploaded %}
+
+    <!-- PACIENTE -->
+
+    <div class="alert alert-primary rounded-4 shadow-sm mb-4 d-flex align-items-center gap-2">
+
+        <i class="bi bi-person-circle fs-5"></i>
+
+        <span>
+            <strong>Paciente:</strong>
+            {{ paciente }}
+        </span>
+
+    </div>
+
+    <!-- IMAGENES -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- ORIGINAL -->
+
+        <div class="col-lg-6">
+
+            <div class="chart-card text-center">
+
+                <h5 class="fw-bold mb-4">
+                    <i class="bi bi-image text-secondary me-2"></i>
+                    Radiografía Original
+                </h5>
+
+                <img
+                    src="{{ uploaded }}"
+                    class="img-fluid rounded-4 shadow-sm result-img"
+                    style="max-height:420px;"
+                >
+
+            </div>
+
+        </div>
+
+        <!-- IA -->
+
+        <div class="col-lg-6">
+
+            <div class="chart-card text-center">
+
+                <h5 class="fw-bold text-danger mb-4">
+                    <i class="bi bi-eye-fill me-2"></i>
+                    Detección IA
+                </h5>
+
+                <img
+                    src="{{ prediction }}"
+                    class="img-fluid rounded-4 shadow-sm result-img"
+                    style="max-height:420px;"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- METRICAS -->
+    <!-- ===================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- RESULTADO -->
+
+        <div class="col-md-3">
+
+            <div class="metric-card">
+
+                <i class="bi bi-clipboard2-pulse text-primary"></i>
+
+                <h6>
+                    Diagnóstico
+                </h6>
+
+                <h5>
+                    {{ resultado }}
+                </h5>
+
+            </div>
+
+        </div>
+
+        <!-- AREA -->
+
+        <div class="col-md-3">
+
+            <div class="metric-card">
+
+                <i class="bi bi-percent text-warning"></i>
+
+                <h6>
+                    Área afectada
+                </h6>
+
+                <h5>
+                    {{ porcentaje }}%
+                </h5>
+
+            </div>
+
+        </div>
+
+        <!-- CONFIANZA -->
+
+        <div class="col-md-3">
+
+            <div class="metric-card">
+
+                <i class="bi bi-shield-check text-success"></i>
+
+                <h6>
+                    Confianza IA
+                </h6>
+
+                <h5>
+                    {{ confianza }}%
+                </h5>
+
+            </div>
+
+        </div>
+
+        <!-- DETECCIONES -->
+
+        <div class="col-md-3">
+
+            <div class="metric-card">
+
+                <i class="bi bi-bullseye text-danger"></i>
+
+                <h6>
+                    Detecciones
+                </h6>
+
+                <h5>
+                    {{ detecciones }}
+                </h5>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <!-- ===================================== -->
+    <!-- HISTORIAL -->
+    <!-- ===================================== -->
+
+    <div class="chart-card">
+
+        <h5 class="fw-bold mb-4">
+            <i class="bi bi-clock-history text-purple me-2"></i>
+            Historial Reciente
+        </h5>
+
+        {% for d in historial %}
+
+        <div class="history-item">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="history-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <div>
+
+                    <strong>
+
+                        {% if d.paciente %}
+
+                            {{ d.paciente.nombres }}
+                            {{ d.paciente.apellidos }}
+
+                        {% else %}
+
+                            Paciente no disponible
+
+                        {% endif %}
+
+                    </strong>
+
+                    <div class="small text-muted mt-1">
+
+                        {{ d.resultado }}
+
+                    </div>
+
+                    <div class="small text-muted">
+
+                        <i class="bi bi-calendar3 me-1"></i>
+                        {{ d.fecha_analisis }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div>
+
+                <span class="badge bg-purple-soft rounded-pill px-3 py-2">
+
+                    {{ d.probabilidad|floatformat:2 }}
+
+                </span>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="alert alert-info rounded-4 d-flex align-items-center gap-2">
+
+            <i class="bi bi-info-circle-fill"></i>
+
+            No existen diagnósticos registrados.
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<!-- ===================================== -->
+<!-- ESTILOS -->
+<!-- ===================================== -->
+
+<style>
+
+body{
+    background:#f5f7fb;
+}
+
+.text-purple{
+    color:#7b2ff7;
+}
+
+.btn-purple{
+    background:linear-gradient(135deg,#7b2ff7,#9b4dff);
+    border:none;
+    font-weight:600;
+    letter-spacing:0.3px;
+    transition:0.25s ease;
+    box-shadow:0 6px 16px rgba(123,47,247,0.25);
+}
+
+.btn-purple:hover{
+    background:linear-gradient(135deg,#6920e6,#8a3df0);
+    box-shadow:0 8px 20px rgba(123,47,247,0.35);
+    transform:translateY(-1px);
+    color:#fff;
+}
+
+.upload-form .form-select,
+.upload-form .form-control{
+    border:1px solid #e6e6ee;
+    box-shadow:none;
+    transition:0.2s ease;
+}
+
+.upload-form .form-select:focus,
+.upload-form .form-control:focus{
+    border-color:#9b4dff;
+    box-shadow:0 0 0 3px rgba(123,47,247,0.12);
+}
+
+.stats-card{
+    border-radius:25px;
+    padding:30px;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    height:100%;
+    transition:0.3s ease;
+}
+
+.stats-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 14px 30px rgba(0,0,0,0.12);
+}
+
+.stats-card small{
+    opacity:0.9;
+    font-size:15px;
+    letter-spacing:0.3px;
+    text-transform:uppercase;
+}
+
+.stats-card h2{
+    font-size:42px;
+    margin-top:10px;
+    font-weight:700;
+}
+
+.stats-card i{
+    font-size:55px;
+    opacity:0.35;
+}
+
+.purple-card{
+    background:linear-gradient(135deg,#7b2ff7,#9b4dff);
+}
+
+.green-card{
+    background:linear-gradient(135deg,#00b894,#00d2a0);
+}
+
+.red-card{
+    background:linear-gradient(135deg,#ff416c,#ff4b2b);
+}
+
+.chart-card{
+    background:white;
+    border-radius:25px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+    height:100%;
+}
+
+.chart-container{
+    position:relative;
+    height:350px;
+}
+
+.metric-card{
+    background:white;
+    border-radius:25px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 10px 20px rgba(0,0,0,0.05);
+    height:100%;
+    transition:0.3s ease;
+    border:1px solid transparent;
+}
+
+.metric-card:hover{
+    transform:translateY(-5px);
+    border-color:#f0eaff;
+    box-shadow:0 16px 30px rgba(123,47,247,0.10);
+}
+
+.metric-card i{
+    font-size:55px;
+}
+
+.metric-card h6{
+    margin-top:15px;
+    color:#888;
+    text-transform:uppercase;
+    font-size:12px;
+    letter-spacing:0.6px;
+}
+
+.metric-card h5{
+    font-weight:700;
+    margin-top:6px;
+}
+
+.result-img{
+    border:1px solid #f0f0f5;
+    transition:0.3s ease;
+}
+
+.result-img:hover{
+    transform:scale(1.01);
+    box-shadow:0 12px 28px rgba(0,0,0,0.10);
+}
+
+.history-item{
+    border:1px solid #eee;
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    transition:0.25s ease;
+}
+
+.history-item:hover{
+    background:#fafafa;
+    border-color:#ece3ff;
+    transform:translateX(2px);
+}
+
+.history-avatar{
+    width:44px;
+    height:44px;
+    min-width:44px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#7b2ff7,#9b4dff);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    box-shadow:0 6px 14px rgba(123,47,247,0.25);
+}
+
+.bg-purple-soft{
+    background:#f1e9ff;
+    color:#7b2ff7;
+    font-weight:600;
+}
+
+</style>
+
+<!-- ===================================== -->
+<!-- CHART JS -->
+<!-- ===================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const meses = {{ chart_labels|safe }};
+const datos = {{ chart_data|safe }};
+
+/* ===================================== */
+/* BARRAS */
+/* ===================================== */
+
+new Chart(document.getElementById('barChart'), {
+
+    type: 'bar',
+
+    data: {
+
+        labels: meses,
+
+        datasets: [{
+
+            label: 'Diagnósticos',
+
+            data: datos,
+
+            backgroundColor: '#7b2ff7',
+
+            hoverBackgroundColor:'#9b4dff',
+
+            borderRadius: 12,
+
+            borderSkipped:false
+
+        }]
+
+    },
+
+    options: {
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        plugins: {
+
+            legend: {
+                display:false
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero:true,
+
+                ticks:{
+                    stepSize:1
+                },
+
+                grid:{
+                    color:'#ececec'
+                }
+
+            },
+
+            x: {
+
+                grid:{
+                    display:false
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+/* ===================================== */
+/* RADAR */
+/* ===================================== */
+
+new Chart(document.getElementById('radarChart'), {
+
+    type:'radar',
+
+    data: {
+
+        labels:[
+
+            'Precisión',
+            'Sensibilidad',
+            'Especificidad',
+            'Detección',
+            'Confiabilidad'
+
+        ],
+
+        datasets:[{
+
+            label:'IA Dental',
+
+            data:[
+
+                {{ precision_promedio }},
+                88,
+                91,
+                86,
+                90
+
+            ],
+
+            backgroundColor:'rgba(123,47,247,0.2)',
+
+            borderColor:'#7b2ff7',
+
+            pointBackgroundColor:'#7b2ff7',
+
+            pointBorderColor:'#fff',
+
+            pointRadius:5,
+
+            borderWidth:3
+
+        }]
+
+    },
+
+    options:{
+
+        responsive:true,
+
+        maintainAspectRatio:false,
+
+        scales:{
+
+            r:{
+
+                min:0,
+
+                max:100,
+
+                ticks:{
+
+                    stepSize:20,
+
+                    backdropColor:'transparent'
+
+                },
+
+                grid:{
+                    color:'#ddd'
+                },
+
+                angleLines:{
+                    color:'#ddd'
+                },
+
+                pointLabels:{
+
+                    color:'#555',
+
+                    font:{
+                        size:13
+                    }
+
+                }
+
+            }
+
+        },
+
+        plugins:{
+
+            legend:{
+
+                labels:{
+                    color:'#333'
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Consultas
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-clipboard2-pulse-fill text-primary me-2"></i>
+                Gestión de Consultas
+            </h2>
+            <p class="text-muted mb-0">Registra y revisa el historial clínico de cada paciente</p>
+        </div>
+
+        <button
+            class="btn btn-primary btn-lg shadow-sm rounded-3"
+            data-bs-toggle="modal"
+            data-bs-target="#modalConsulta"
+        >
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva Consulta
+        </button>
+
+    </div>
+
+    <!-- TABLA -->
+
+    <div class="card shadow-sm border-0 rounded-4">
+
+        <div class="card-header bg-white border-0 pt-4 pb-0">
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-list-ul me-2 text-primary"></i>
+                Listado de Consultas
+            </h5>
+        </div>
+
+        <div class="card-body pt-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr class="text-muted small text-uppercase">
+
+                            <th class="ps-3">#</th>
+                            <th>Paciente</th>
+                            <th>Cita</th>
+                            <th>Fecha</th>
+                            <th>Diagnóstico</th>
+                            <th>Tratamiento</th>
+                            <th class="text-end pe-3">Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for c in consultas %}
+
+                        <tr>
+
+                            <td class="ps-3 text-muted">
+
+                                #{{ c.id_consulta }}
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; font-size:0.85rem;">
+
+                                        <i class="bi bi-person-fill"></i>
+
+                                    </div>
+
+                                    <span class="fw-semibold">
+
+                                        {{ c.id_paciente }}
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge rounded-pill bg-secondary-subtle text-secondary px-3 py-2">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    Cita #{{ c.id_cita.id_cita }}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">{{ c.fecha_consulta|date:"d/m/Y" }}</span>
+                                    <small class="text-muted">{{ c.fecha_consulta|date:"H:i" }} hrs</small>
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <span class="text-muted">
+                                    {% if c.diagnostico %}
+                                        {{ c.diagnostico|truncatechars:40 }}
+                                    {% else %}
+                                        <span class="fst-italic">Sin diagnóstico</span>
+                                    {% endif %}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <span class="text-muted">
+                                    {% if c.tratamiento %}
+                                        {{ c.tratamiento|truncatechars:40 }}
+                                    {% else %}
+                                        <span class="fst-italic">Sin tratamiento</span>
+                                    {% endif %}
+                                </span>
+
+                            </td>
+
+                            <td class="text-end pe-3">
+
+                                <button
+                                    class="btn btn-outline-warning btn-sm rounded-3"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editarModal{{ c.id_consulta }}"
+                                >
+                                    <i class="bi bi-pencil-square me-1"></i>
+                                    Editar
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                        <!-- MODAL EDITAR -->
+
+                        <div
+                            class="modal fade"
+                            id="editarModal{{ c.id_consulta }}"
+                            tabindex="-1"
+                        >
+
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+
+                                <div class="modal-content rounded-4 border-0 shadow-lg">
+
+                                    <div class="modal-header border-0 pb-0">
+
+                                        <h5 class="modal-title fw-bold">
+                                            <i class="bi bi-pencil-square me-2 text-warning"></i>
+                                            Editar Consulta #{{ c.id_consulta }}
+                                        </h5>
+
+                                        <button
+                                            type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                        ></button>
+
+                                    </div>
+
+                                    <form
+                                        method="POST"
+                                        action="/consultas/editar/{{ c.id_consulta }}/"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <div class="modal-body">
+
+                                            <div class="row g-3">
+
+                                                <div class="col-md-6">
+
+                                                    <label
+                                                        for="paciente{{ c.id_consulta }}"
+                                                        class="form-label fw-semibold"
+                                                    >
+                                                        <i class="bi bi-person me-1"></i>
+                                                        Paciente
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="paciente{{ c.id_consulta }}"
+                                                        class="form-control bg-light"
+                                                        value="{{ c.id_paciente }}"
+                                                        readonly
+                                                    >
+
+                                                </div>
+
+                                                <div class="col-md-6">
+
+                                                    <label
+                                                        for="fecha{{ c.id_consulta }}"
+                                                        class="form-label fw-semibold"
+                                                    >
+                                                        <i class="bi bi-calendar-event me-1"></i>
+                                                        Fecha
+                                                    </label>
+
+                                                    <input
+                                                        type="datetime-local"
+                                                        id="fecha{{ c.id_consulta }}"
+                                                        name="fecha_consulta"
+                                                        value="{{ c.fecha_consulta|date:'Y-m-d\\TH:i' }}"
+                                                        class="form-control"
+                                                    >
+
+                                                </div>
+
+                                                <div class="col-md-12">
+
+                                                    <label
+                                                        for="motivo{{ c.id_consulta }}"
+                                                        class="form-label fw-semibold"
+                                                    >
+                                                        <i class="bi bi-chat-left-dots me-1"></i>
+                                                        Motivo Consulta
+                                                    </label>
+
+                                                    <textarea
+                                                        id="motivo{{ c.id_consulta }}"
+                                                        name="motivo_consulta"
+                                                        class="form-control"
+                                                        rows="2"
+                                                        placeholder="Describe el motivo de la consulta..."
+                                                    >{{ c.motivo_consulta }}</textarea>
+
+                                                </div>
+
+                                                <div class="col-md-12">
+
+                                                    <label
+                                                        for="diagnostico{{ c.id_consulta }}"
+                                                        class="form-label fw-semibold"
+                                                    >
+                                                        <i class="bi bi-clipboard2-pulse me-1"></i>
+                                                        Diagnóstico
+                                                    </label>
+
+                                                    <textarea
+                                                        id="diagnostico{{ c.id_consulta }}"
+                                                        name="diagnostico"
+                                                        class="form-control"
+                                                        rows="3"
+                                                        placeholder="Diagnóstico médico..."
+                                                    >{{ c.diagnostico }}</textarea>
+
+                                                </div>
+
+                                                <div class="col-md-12">
+
+                                                    <label
+                                                        for="tratamiento{{ c.id_consulta }}"
+                                                        class="form-label fw-semibold"
+                                                    >
+                                                        <i class="bi bi-capsule me-1"></i>
+                                                        Tratamiento
+                                                    </label>
+
+                                                    <textarea
+                                                        id="tratamiento{{ c.id_consulta }}"
+                                                        name="tratamiento"
+                                                        class="form-control"
+                                                        rows="3"
+                                                        placeholder="Tratamiento indicado..."
+                                                    >{{ c.tratamiento }}</textarea>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="modal-footer border-0">
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-light rounded-3"
+                                                data-bs-dismiss="modal"
+                                            >
+                                                Cancelar
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-warning rounded-3 px-4"
+                                            >
+                                                <i class="bi bi-save me-1"></i>
+                                                Actualizar
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                        {% if not consultas %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-clipboard2-x fs-1 d-block mb-2"></i>
+                                No hay consultas registradas todavía.
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL NUEVA CONSULTA -->
+
+<div
+    class="modal fade"
+    id="modalConsulta"
+    tabindex="-1"
+>
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+
+            <div class="modal-header border-0 pb-0">
+
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-clipboard2-plus me-2 text-primary"></i>
+                    Registrar Consulta
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+
+            </div>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-3 d-flex align-items-start gap-2">
+                        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                        <div>
+                            {{ form.errors }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label
+                                for="{{ form.id_paciente.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                <i class="bi bi-person me-1"></i>
+                                Paciente
+                            </label>
+
+                            {{ form.id_paciente }}
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label
+                                for="{{ form.id_cita.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                <i class="bi bi-calendar-check me-1"></i>
+                                Cita
+                            </label>
+
+                            {{ form.id_cita }}
+
+                        </div>
+
+                        <div class="col-md-12">
+
+                            <label
+                                for="{{ form.motivo_consulta.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                <i class="bi bi-chat-left-dots me-1"></i>
+                                Motivo Consulta
+                            </label>
+
+                            {{ form.motivo_consulta }}
+
+                        </div>
+
+                        <div class="col-md-12">
+
+                            <label
+                                for="{{ form.diagnostico.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                <i class="bi bi-clipboard2-pulse me-1"></i>
+                                Diagnóstico
+                            </label>
+
+                            {{ form.diagnostico }}
+
+                        </div>
+
+                        <div class="col-md-12">
+
+                            <label
+                                for="{{ form.tratamiento.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                <i class="bi bi-capsule me-1"></i>
+                                Tratamiento
+                            </label>
+
+                            {{ form.tratamiento }}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0">
+
+                    <button
+                        type="button"
+                        class="btn btn-light rounded-3"
+                        data-bs-dismiss="modal"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary rounded-3 px-4"
+                    >
+                        <i class="bi bi-save me-1"></i>
+                        Guardar Consulta
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

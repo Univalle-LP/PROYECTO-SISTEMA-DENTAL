@@ -1,0 +1,22 @@
+<div class="col-md-6 mb-3">
+
+    <label class="form-label">
+
+        Paciente
+
+    </label>
+
+    <input
+        type="text"
+        class="form-control"
+        value="{{ cita.id_paciente.nombres }} {{ cita.id_paciente.apellidos }}"
+        readonly
+    >
+
+    <input
+        type="hidden"
+        name="id_paciente"
+        value="{{ cita.id_paciente.id_paciente }}"
+    >
+
+</div>

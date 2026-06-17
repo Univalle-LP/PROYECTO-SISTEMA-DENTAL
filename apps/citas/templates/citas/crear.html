@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Nueva Cita
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card border-0 shadow rounded-4">
+
+        <div class="card-body p-4">
+
+            <h3 class="fw-bold mb-4">
+
+                Registrar Cita
+
+            </h3>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label>
+
+                        Paciente
+
+                    </label>
+
+                    {{ form.id_paciente }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>
+
+                        Fecha Cita
+
+                    </label>
+
+                    {{ form.fecha_cita }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>
+
+                        Estado
+
+                    </label>
+
+                    {{ form.estado }}
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label>
+
+                        Observación
+
+                    </label>
+
+                    {{ form.observacion }}
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    Guardar
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
